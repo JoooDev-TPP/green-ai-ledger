@@ -1,25 +1,20 @@
 # green-ai-ledger
 
+[![tests](https://github.com/JoooDev-TPP/green-ai-ledger/actions/workflows/test.yml/badge.svg)](https://github.com/JoooDev-TPP/green-ai-ledger/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/github/license/JoooDev-TPP/green-ai-ledger)](LICENSE)
+
 Measure what your compute costs in carbon, with the grid factor **pinned to a
 cited source** instead of guessed from your IP address.
 
 ```bash
+pip install "git+https://github.com/JoooDev-TPP/green-ai-ledger"   # installs codecarbon, typer and `ledger`
+
 ledger run --label "train the model" --project my-repo -- make train
 ledger report --out reports/green-ai.md
 ```
 
-## Why this exists
-
-Run a carbon tracker out of the box and it geolocates your machine from its
-public IP, then applies that country's grid factor. But a public IP says where
-the traffic leaves, not where the machine is. Behind a corporate proxy, a cloud
-relay, a VPN or a university gateway, the tracker applies the grid of the exit —
-and the number comes out plausible, carries a country name, and nobody re-checks
-it.
-
-How wrong depends only on where the exit happens to be. Here is the heaviest job
-in this ledger, 2.29 Wh on a machine drawing from the Guangdong grid, re-scored
-with the factor CodeCarbon 3.3.1 would apply for each exit country:
+The same 2.29 Wh job, scored with the factor a tracker would apply depending on
+where the machine's public IP happens to exit (CodeCarbon 3.3.1 factors):
 
 | Public IP resolves to | Factor applied | Result | Error |
 |---|---|---|---|
@@ -31,10 +26,18 @@ with the factor CodeCarbon 3.3.1 would apply for each exit country:
 | United States | 0.3695 | 0.84 g | −16% |
 | Iceland | 0.0277 | 0.06 g | −94% |
 
-Same machine, same work: anything from half again too much to a sixteenth of
-the right answer, depending on a routing detail nobody reports. And the second
-row is the quieter point — **even getting the country right is 32% off**,
-because a national average is not a province.
+Same machine, same work: anything from half again too much to a sixteenth of the
+right answer. And **even getting the country right is 32% off**, because a
+national average is not a province.
+
+## Why this exists
+
+Run a carbon tracker out of the box and it geolocates your machine from its
+public IP, then applies that country's grid factor. But a public IP says where
+the traffic leaves, not where the machine is. Behind a corporate proxy, a cloud
+relay, a VPN or a university gateway, the tracker applies the grid of the exit —
+and the number comes out plausible, carries a country name, and nobody re-checks
+it.
 
 So this tool refuses to geolocate. The region is an argument, an unknown region
 is an error rather than a fallback, and every factor carries its issuing body,
@@ -51,17 +54,17 @@ $ ledger factors
 sha256 d43b60a3eaad9f3fe59ca37c204d3d0e1b6ea52742a092f0d856971a3f018e5a
 ```
 
-The spread within one country makes the same point from the other side: 0.1564
-in Sichuan against 0.6361 in the north, a factor of four. "Which country" is not
-a fine enough question.
+(Ministry of Ecology and Environment and National Bureau of Statistics, notice
+on the 2023 electricity CO2 emission factors.) The spread within one country:
+0.1564 in Sichuan against 0.6361 in the north, a factor of four. "Which country"
+is not a fine enough question.
 
 ## Measured is not the same as estimated
 
 macOS exposes real per-subsystem power through `powermetrics`, which needs root.
 Without root, every tool — this one included — falls back to the processor's
-nameplate wattage multiplied by elapsed time. That is an assumption about
-average utilisation wearing the clothes of a measurement, and on a laptop that
-idles between bursts it can be out by several times.
+nameplate wattage multiplied by elapsed time. On a laptop that idles between
+bursts that can be out by several times.
 
 So every record carries a `method` field, the report totals the two groups
 separately and never adds across the line, and a ledger of estimates says so in
@@ -69,38 +72,32 @@ its first sentence:
 
 > **全部记录为估算，不是实测。** 本机没有以 root 运行 `powermetrics`，因此功率取的
 > 是处理器铭牌值乘以时长。笔记本在任务之间会闲置，这种估算可能偏高数倍。
+>
+> *(All records are estimates, not measurements: `powermetrics` was not run as root, so power is nameplate × duration, which can overstate a laptop that idles between tasks by several times.)*
 
-The raw kilowatt-hours are kept in the ledger alongside the factor, so if either
-turns out to be wrong the figure can be recomputed without re-running the work.
-
-The ledger is meant to be committed next to the work it measures, so the command
-line it records has the home directory written as `~` — an interpreter's
-absolute path otherwise carries the user's name into a public file.
+The raw kilowatt-hours are kept alongside the factor, so either can be corrected
+later without re-running the work. The recorded command line has the home
+directory written as `~`, because the ledger is meant to be committed next to the
+work it measures.
 
 ## What it measured
 
-Three runs across two of my repositories
-(pv-wind-power-forecast,
-[aiwp-china-verification](https://github.com/JoooDev-TPP/aiwp-china-verification)),
-on an M1 Pro laptop, Guangdong grid:
+Three runs across two repositories, on an M1 Pro laptop, Guangdong grid
+([full ledger](reports/green-ai.md)):
 
 | Project | Task | Duration | Energy | CO2e |
 |---|---|---|---|---|
 | pv-wind-power-forecast | ultra-short-term training, 14 stations × 16 horizons | 134 s | 2.29 Wh | 1.01 g |
-| aiwp-china-verification | verification over 198k forecast pairs | 4 s | 0.03 Wh | 0.01 g |
+| [aiwp-china-verification](https://github.com/JoooDev-TPP/aiwp-china-verification) | verification over 198k forecast pairs | 4 s | 0.03 Wh | 0.01 g |
 | aiwp-china-verification | figures | 4 s | 0.03 Wh | 0.01 g |
 
-One gram of CO2e for the heaviest job. That is the honest headline and it is not
-a flattering one: gradient-boosted trees on a laptop cost roughly what boiling a
-thimble of water costs. Publishing the number anyway is the point — a figure
-only means something if it gets reported when it is small as well as when it is
-large.
+One gram of CO2e for the heaviest job — roughly what boiling a thimble of water
+costs. Publishing the number anyway is the point: a figure only means something
+if it gets reported when it is small as well as when it is large.
 
 ## Usage
 
 ```bash
-pip install -e .          # installs codecarbon, typer and the `ledger` command
-
 ledger run --label "…" --project repo -- <any command>   # measure and record
 ledger run --region 四川 --label "…" --project repo -- …  # different grid
 ledger report --out reports/green-ai.md                  # markdown ledger
@@ -115,8 +112,8 @@ without changing what a failure means.
 
 Local compute only: the CPU, GPU and memory of the machine the command runs on,
 for the duration it runs. Not the manufacture of the hardware, not the network,
-not anything the command calls out to. A number that excludes the embodied
-carbon of a laptop is not a life-cycle assessment and is not presented as one.
+not anything the command calls out to. It is not a life-cycle assessment and is
+not presented as one.
 
 ## Layout
 
@@ -126,10 +123,15 @@ src/ledger/
   measure.py   run something, record energy, record whether it was measured
   report.py    markdown ledger, measured and estimated kept apart
   cli.py       ledger run / report / badge / factors
-tests/         16 tests
+tests/         `pytest`
 ```
 
 ## Related repositories
 
+- [Carbon-Footprint-LCA](https://github.com/JoooDev-TPP/Carbon-Footprint-LCA) — the same official 2023 grid factors, applied to lifecycle emissions of electricity
 - [aiwp-china-verification](https://github.com/JoooDev-TPP/aiwp-china-verification) — fixed-lead verification of physics and AI weather models at Chinese stations
 - [cn-weather-cube](https://github.com/JoooDev-TPP/cn-weather-cube) — point weather with units attached and sources named
+
+## License
+
+MIT. Grid factors: see the citation printed by `ledger factors`.
