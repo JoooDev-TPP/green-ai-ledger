@@ -3,7 +3,7 @@ name = "ledger"
 version = "0.1.0"
 description = "Measure the energy your compute uses, with the grid factor pinned rather than guessed from your IP"
 requires-python = ">=3.11"
-authors = [{ name = "Haohang Zhao" }]
+authors = [{ name = "JooooDev" }]
 license = { text = "MIT" }
 dependencies = ["codecarbon>=3.0", "typer>=0.9"]
 
