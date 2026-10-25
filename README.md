@@ -81,7 +81,7 @@ absolute path otherwise carries the user's name into a public file.
 
 Three runs across two of my repositories
 (pv-wind-power-forecast,
-[aiwp-china-verification](https://github.com/Zhaohh0706/aiwp-china-verification)),
+[aiwp-china-verification](https://github.com/JoooDev-TPP/aiwp-china-verification)),
 on an M1 Pro laptop, Guangdong grid:
 
 | Project | Task | Duration | Energy | CO2e |
@@ -131,5 +131,5 @@ tests/         16 tests
 
 ## Related repositories
 
-- [aiwp-china-verification](https://github.com/Zhaohh0706/aiwp-china-verification) — fixed-lead verification of physics and AI weather models at Chinese stations
-- [cn-weather-cube](https://github.com/Zhaohh0706/cn-weather-cube) — point weather with units attached and sources named
+- [aiwp-china-verification](https://github.com/JoooDev-TPP/aiwp-china-verification) — fixed-lead verification of physics and AI weather models at Chinese stations
+- [cn-weather-cube](https://github.com/JoooDev-TPP/cn-weather-cube) — point weather with units attached and sources named
